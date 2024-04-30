@@ -1,0 +1,78 @@
+class Edge:
+    def _init_(self, start_vertex, end_vertex, weight):
+        self.start_vertex = start_vertex
+        self.end_vertex = end_vertex
+        self.weight = weight
+
+def initialize_single_source(vertices, start_vertex):
+    distances = {v: float('inf') for v in vertices}
+    distances[start_vertex] = 0
+    predecessors = {v: None for v in vertices}
+    return distances, predecessors
+
+def bellman_ford_algorithm(vertices, edges, start_vertex):
+    distances, predecessors = initialize_single_source(vertices, start_vertex)
+    for _ in range(len(vertices) - 1):
+        for edge in edges:
+            relax(edge.start_vertex, edge.end_vertex, edge.weight, distances, predecessors)
+    for edge in edges:
+        if distances[edge.end_vertex] > distances[edge.start_vertex] + edge.weight:
+            return False
+    return distances, predecessors
+
+def relax(start_vertex, end_vertex, weight, distances, predecessors):
+    if distances[end_vertex] > distances[start_vertex] + weight:
+        distances[end_vertex] = distances[start_vertex] + weight
+        predecessors[end_vertex] = start_vertex
+
+def print_original_graph(vertices, edges):
+    print("Original Graph:")
+    for edge in edges:
+        print(edge.start_vertex, "->", edge.end_vertex, ":", edge.weight)
+    print()
+
+def print_shortest_distances(distances, predecessors, start_vertex):
+    print("Shortest distances from", start_vertex)
+    for vertex, distance in distances.items():
+        print("Vertex:", vertex, "Distance:", distance, "Predecessor:", predecessors[vertex])
+    print()
+
+def construct_shortest_distance_graph(vertices, edges, distances, predecessors):
+    shortest_distance_edges = []
+    for vertex in vertices:
+        predecessor = predecessors[vertex]
+        if predecessor is not None:
+            shortest_distance_edges.append(Edge(predecessor, vertex, distances[vertex]))
+    return shortest_distance_edges
+
+def print_shortest_distance_graph(shortest_distance_edges):
+    print("Shortest Distance Graph:")
+    for edge in shortest_distance_edges:
+        print(edge.start_vertex, "->", edge.end_vertex, ":", edge.weight)
+    print()
+
+vertices = ['s', 't', 'x', 'y', 'z']
+edges = [
+    Edge('s', 't', 6),
+    Edge('s', 'y', 7),
+    Edge('t', 'x', 5),
+    Edge('t', 'y', 8),
+    Edge('t', 'z', -4),
+    Edge('x', 't', -2),
+    Edge('y', 'x', -3),
+    Edge('y', 'z', 9),
+    Edge('z', 'x', 7),
+    Edge('z', 's', 2)
+]
+start_vertex = 's'
+
+print_original_graph(vertices, edges)
+
+result = bellman_ford_algorithm(vertices, edges, start_vertex)
+if result:
+    distances, predecessors = result
+    print_shortest_distances(distances, predecessors, start_vertex)
+    shortest_distance_edges = construct_shortest_distance_graph(vertices, edges, distances, predecessors)
+    print_shortest_distance_graph(shortest_distance_edges)
+else:
+    print("Negative cycle detected")
